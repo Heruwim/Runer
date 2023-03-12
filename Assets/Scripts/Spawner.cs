@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Spawner : MonoBehaviour
+public class Spawner : ObjectPool
 {
     [SerializeField] private GameObject _enemyPrefab;
     [SerializeField] private Transform[] _spawnPoints;
@@ -8,16 +8,31 @@ public class Spawner : MonoBehaviour
 
     private float _elapsedTime = 0;
 
+    private void Start()
+    {
+        Initialize(_enemyPrefab);
+    }
+
     private void Update()
     {
         _elapsedTime += Time.deltaTime;
 
         if ( _elapsedTime >= _secondsBetweenSpawn)
         {
-            _elapsedTime = 0;
+            if(TryGetObject(out GameObject enemy))
+            {
+                _elapsedTime = 0;
 
-            int spawnPointerNumber = Random.Range(0, _spawnPoints.Length);
-            Instantiate(_enemyPrefab, _spawnPoints[spawnPointerNumber]);
+                int spawnPointerNumber = Random.Range(0, _spawnPoints.Length);
+
+                SetEnemy(enemy, _spawnPoints[spawnPointerNumber].position);
+            }
         }
+    }
+
+    private void SetEnemy(GameObject enemy, Vector3 spawnPoint)
+    {
+        enemy.SetActive(true);
+        enemy.transform.position = spawnPoint;
     }
 }
